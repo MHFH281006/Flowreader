@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlowReader - Métricas de Fluxo</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; background: #f5f7fa; }
+    h1 { color: #1a73e8; }
+    .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    label { display: block; margin-top: 10px; font-weight: bold; }
+    input { width: 100%; padding: 8px; margin-top: 4px; box-sizing: border-box; }
+    button { background: #1a73e8; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin-top: 15px; }
+    button:hover { background: #1557b0; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+    th { background: #e8f0fe; }
+    .metrics { display: flex; gap: 20px; flex-wrap: wrap; }
+    .metric { background: #e8f0fe; padding: 15px; border-radius: 8px; flex: 1; min-width: 150px; text-align: center; }
+    .metric strong { display: block; font-size: 1.4em; color: #1a73e8; }
+  </style>
+</head>
+<body>
+  <h1>FlowReader</h1>
+  <p>Leitor de Métricas de Fluxo Ágil — versão inicial da Sprint 1</p>
+
+  <div class="card">
+    <h2>Adicionar Cartão</h2>
+    <label>Título do cartão</label>
+    <input type="text" id="titulo" placeholder="Ex: Implementar login">
+    <label>Data de início</label>
+    <input type="date" id="inicio">
+    <label>Data de conclusão</label>
+    <input type="date" id="fim">
+    <button onclick="adicionar()">Adicionar e Calcular</button>
+  </div>
+
+  <div class="card">
+    <h2>Métricas</h2>
+    <div class="metrics">
+      <div class="metric">Lead Time médio<br><strong id="leadMedio">—</strong></div>
+      <div class="metric">Cartões<br><strong id="total">0</strong></div>
+      <div class="metric">Throughput (total)<br><strong id="throughput">0</strong></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Cartões</h2>
+    <table id="tabela">
+      <thead>
+        <tr><th>Título</th><th>Início</th><th>Fim</th><th>Lead Time (dias)</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    let cartoes = [];
+
+    function adicionar() {
+      const titulo = document.getElementById('titulo').value.trim();
+      const inicio = document.getElementById('inicio').value;
+      const fim = document.getElementById('fim').value;
+
+      if (!titulo || !inicio || !fim) {
+        alert('Preencha todos os campos.');
+        return;
+      }
+      if (new Date(fim) < new Date(inicio)) {
+        alert('A data de conclusão não pode ser anterior à data de início.');
+        return;
+      }
+
+      const lead = Math.round((new Date(fim) - new Date(inicio)) / (1000 * 60 * 60 * 24));
+      cartoes.push({ titulo, inicio, fim, lead });
+
+      atualizar();
+      document.getElementById('titulo').value = '';
+      document.getElementById('inicio').value = '';
+      document.getElementById('fim').value = '';
+    }
+
+    function atualizar() {
+      const tbody = document.querySelector('#tabela tbody');
+      tbody.innerHTML = '';
+      let soma = 0;
+      cartoes.forEach(c => {
+        soma += c.lead;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${c.titulo}</td><td>${c.inicio}</td><td>${c.fim}</td><td>${c.lead}</td>`;
+        tbody.appendChild(tr);
+      });
+
+      const media = cartoes.length ? (soma / cartoes.length).toFixed(1) : '—';
+      document.getElementById('leadMedio').textContent = media + (cartoes.length ? ' dias' : '');
+      document.getElementById('total').textContent = cartoes.length;
+      document.getElementById('throughput').textContent = cartoes.length;
+    }
+  </script>
+</body>
+</html>
